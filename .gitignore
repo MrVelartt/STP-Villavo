@@ -1,0 +1,31 @@
+# Archivos de entorno
+.env
+*.env
+
+# Archivos de sistema
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Base de datos SQLite
+db.sqlite3
+
+# Configuración de logs y cache
+*.log
+*.swp
+*.swo
+*.bak
+*.cache
+
+# Archivos de Django y migraciones
+**/migrations/*
+!**/migrations/__init__.py
+
+# Archivos de Docker
+docker-compose.override.yml
+
+# Configuración de VSCode y entornos virtuales
+.vscode/
+venv/
+.env/
