@@ -1,0 +1,53 @@
+services:
+  django:
+    build: .
+    container_name: django_app
+    restart: always
+    depends_on:
+      db:
+        condition: service_healthy  # Antes decía 'postgres'
+      redis:
+        condition: service_started
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - DB_NAME=dbbus
+      - DB_USER=postgres
+      - DB_PASSWORD=Voluntad1
+      - DB_HOST=db  # Antes era 'postgres'
+      - DB_PORT=5432
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app
+    command: >
+      sh -c "python manage.py migrate &&
+             python manage.py runserver 0.0.0.0:8000"
+
+  redis:
+    image: redis:latest
+    container_name: redis
+    restart: always
+    ports:
+      - "6379:6379"
+
+  db:  # Antes 'postgres'
+    image: postgres:latest
+    container_name: db_container
+    restart: always
+    environment:
+      POSTGRES_DB: dbbus
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: Voluntad1
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d dbbus"]
+      interval: 5s
+      retries: 5
+      start_period: 10s
+
+volumes:
+  postgres_data:
