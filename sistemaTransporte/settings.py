@@ -16,6 +16,10 @@ DEBUG = True
 
 ALLOWED_HOSTS = ["*"]
 
+CSRF_TRUSTED_ORIGINS = [
+    "https://ec2-18-117-138-108.us-east-2.compute.amazonaws.com"
+]
+
 
 # Application definition
 
