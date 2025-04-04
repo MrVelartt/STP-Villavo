@@ -1,25 +1,17 @@
-from django.urls import path, include
-from rest_framework.routers import DefaultRouter
+from django.urls import path  # No necesitas include ni DefaultRouter si usas APIView
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
-from .views import (
-    AppInfoViewSet, 
-    CaracteristicaAppViewSet, 
-    RutaViewSet, 
-    DetalleRutaViewSet
-)
+from .views import (AppInfoListAPIView, RutaListAPIView, )
 
-# Configuración del enrutador para las vistas basadas en ViewSets
-router = DefaultRouter()
-router.register(r'app-info', AppInfoViewSet, basename="app-info")
-router.register(r'caracteristicas', CaracteristicaAppViewSet, basename="caracteristicas")
-router.register(r'rutas', RutaViewSet, basename="rutas")
-router.register(r'detalle-rutas', DetalleRutaViewSet, basename="detalle-rutas")
 
 urlpatterns = [
-    # Rutas de la API principal
-    path('api/', include(router.urls)),
+    # Rutas API personalizadas con APIView
+    path('api/app-info/', AppInfoListAPIView.as_view(), name='app-info-list'),
+    path('api/rutas/', RutaListAPIView.as_view(), name='ruta-list'),
 
-    # Rutas de autenticación con JWT
+    # Rutas de autenticación JWT
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+
+    # Si vuelves a usar ViewSets, descomenta:
+    # path('api/', include(router.urls)),
 ]
