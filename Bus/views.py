@@ -9,25 +9,25 @@ class AppInfoViewSet(viewsets.ModelViewSet):
     """API para obtener información de la aplicación"""
     queryset = AppInfo.objects.all()
     serializer_class = AppInfoSerializer
-    permission_classes = [IsAuthenticated]  # Requiere autenticación
+#    permission_classes = [IsAuthenticated]  # Requiere autenticación
 
 class CaracteristicaAppViewSet(viewsets.ModelViewSet): 
     """API para obtener las características de la aplicación"""
     queryset = CaracteristicaApp.objects.all()
     serializer_class = CaracteristicaAppSerializer
-    permission_classes = [IsAuthenticated]  # Requiere autenticación
+#    permission_classes = [IsAuthenticated]  # Requiere autenticación
 
 class RutaViewSet(viewsets.ModelViewSet): 
     """API para obtener las rutas disponibles"""
     queryset = Ruta.objects.all()
     serializer_class = RutaSerializer
-    permission_classes = [IsAuthenticated]  # Requiere autenticación
+#    permission_classes = [IsAuthenticated]  # Requiere autenticación
 
 class DetalleRutaViewSet(viewsets.ReadOnlyModelViewSet):
     """API para obtener detalles de las rutas y permitir login"""
     queryset = DetalleRuta.objects.all()
     serializer_class = DetalleRutaSerializer
 
-    @method_decorator(cache_page(60 * 15))  # Cache por 15 minutos
-    def list(self, request, *args, **kwargs):
-        return super().list(request, *args, **kwargs)
+#    @method_decorator(cache_page(60 * 15))  # Cache por 15 minutos
+#    def list(self, request, *args, **kwargs):
+#        return super().list(request, *args, **kwargs)

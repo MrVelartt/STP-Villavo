@@ -7,7 +7,7 @@ class CaracteristicaAppSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class AppInfoSerializer(serializers.ModelSerializer):
-    caracteristicas_app = CaracteristicaAppSerializer(many=True, read_only=True)
+    caracteristicas_app = CaracteristicaAppSerializer(many=True)
 
     class Meta:
         model = AppInfo
