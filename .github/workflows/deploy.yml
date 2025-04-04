@@ -26,6 +26,7 @@ jobs:
             docker compose down
             docker compose up --build -d
             docker system prune -f  # Opcional: libera espacio eliminando imágenes no usadas
+            docker exec django_app python manage.py makemigrations
             docker exec django_app python manage.py migrate
             docker exec django_app python manage.py collectstatic --noinput
             docker restart django_app
