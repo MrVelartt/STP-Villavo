@@ -1,7 +1,7 @@
 on:
   push:
     branches:
-      - main  # Cambia esto si usas otra rama principal
+      - main
 
 jobs:
   deploy:
@@ -21,11 +21,11 @@ jobs:
           chmod 600 private_key.pem
 
           ssh -o StrictHostKeyChecking=no -i private_key.pem $EC2_USER@$EC2_HOST << 'EOF'
-            cd /home/ubuntu/STP-Villavo  # ✅ Ruta corregida con mayúsculas
+            cd /home/ubuntu/STP-Villavo
             git pull origin main
-            docker compose down
-            docker compose up --build -d
-            docker system prune -f  # Opcional: libera espacio eliminando imágenes no usadas
+            docker-compose down
+            docker-compose up --build -d
+            docker system prune -f
             docker exec django_app python manage.py makemigrations
             docker exec django_app python manage.py migrate
             docker exec django_app python manage.py collectstatic --noinput
