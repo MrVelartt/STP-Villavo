@@ -21,7 +21,7 @@ jobs:
           chmod 600 private_key.pem
 
           ssh -o StrictHostKeyChecking=no -i private_key.pem $EC2_USER@$EC2_HOST << 'EOF'
-            cd /home/ubuntu/stp-villavo  # Ajusta esta ruta si tu proyecto está en otro directorio
+            cd /home/ubuntu/STP-Villavo  # ✅ Ruta corregida con mayúsculas
             git pull origin main
             docker compose down
             docker compose up --build -d
