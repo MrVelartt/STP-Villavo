@@ -31,3 +31,13 @@ class RutaListAPIView(APIView):
             ruta = serializer.save()  # Aquí se activa el save() del modelo con coordenadas
             return Response(RutaSerializer(ruta).data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class RutaDetailAPIView(APIView):
+    def get(self, request, id):
+        try:
+            ruta = Ruta.objects.get(id=id)
+        except Ruta.DoesNotExist:
+            return Response({'detail': 'Ruta no encontrada'}, status=status.HTTP_404_NOT_FOUND)
+
+        serializer = RutaSerializer(ruta)
+        return Response(serializer.data, status=status.HTTP_200_OK)
