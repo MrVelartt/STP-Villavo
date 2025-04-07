@@ -34,6 +34,7 @@ class CaracteristicaApp(models.Model):
 
 class Ruta(models.Model):
     name_route = models.CharField(max_length=255, verbose_name="Nombre de la Ruta", default="Ruta Desconocida")
+    short_name = models.CharField(max_length=255, verbose_name="Abreviatura Ruta", null=True)
     description_route = models.TextField(verbose_name="Descripción General", default="Sin descripción")
     color_route = models.CharField(max_length=7, null=True, blank=True, verbose_name="Color (Hex)", default="#000000")
     image_route = models.ImageField(upload_to='rutas/', null=True, blank=True, verbose_name="Imagen de la Ruta")
