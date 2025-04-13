@@ -17,9 +17,9 @@ DEBUG = True
 ALLOWED_HOSTS = ["*"]
 
 CSRF_TRUSTED_ORIGINS = [
-    "https://ec2-18-117-138-108.us-east-2.compute.amazonaws.com"
+    "https://ec2-18-117-138-108.us-east-2.compute.amazonaws.com",
     "https://stp-villavo.site",
-    "https://www.stp-villavo.site"
+    "https://www.stp-villavo.site",
 ]
 
 
