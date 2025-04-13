@@ -1,11 +1,13 @@
 from django.db import models
 from django.utils import timezone
+import reversion
 import csv
 import io
 import re
 import requests
 from django.core.exceptions import ValidationError
 
+@reversion.register()
 class AppInfo(models.Model):
     icono_app = models.ImageField(upload_to='iconos/', null=True, blank=True, verbose_name="Ícono de la App")
     nombre_app = models.CharField(max_length=255, verbose_name="Nombre de la App")
@@ -18,7 +20,7 @@ class AppInfo(models.Model):
         verbose_name = "Información de la App"
         verbose_name_plural = "Información de la App"
 
-
+@reversion.register()
 class CaracteristicaApp(models.Model):
     app = models.ForeignKey(AppInfo, on_delete=models.CASCADE, related_name="caracteristicas", verbose_name="Aplicación", null=True, blank=True)
     icono = models.ImageField(upload_to='iconos/', null=True, blank=True, verbose_name="Ícono de la Característica")
@@ -31,7 +33,7 @@ class CaracteristicaApp(models.Model):
     class Meta:
         verbose_name_plural = "Características de la App"
 
-
+@reversion.register()
 class Parada(models.Model):
     nombre = models.CharField(max_length=255, verbose_name="Nombre de la Parada")
     coordenada = models.CharField(max_length=255, verbose_name="Coordenada (lat, lon)")
@@ -45,7 +47,7 @@ class Parada(models.Model):
         verbose_name = "Parada"
         verbose_name_plural = "Paradas"
 
-
+@reversion.register()
 class Ruta(models.Model):
     name_route = models.CharField(max_length=255, verbose_name="Nombre de la Ruta", default="Ruta Desconocida")
     short_name = models.CharField(max_length=255, verbose_name="Abreviatura Ruta", null=True)
