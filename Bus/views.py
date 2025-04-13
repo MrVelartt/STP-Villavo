@@ -14,7 +14,8 @@ class AppInfoListAPIView(APIView):
 
 class RutaListAPIView(APIView):
     def get(self, request):
-        rutas = Ruta.objects.prefetch_related('rutaparada_set__parada').all()
+        # Se usa 'rutas_paradas__parada', que es el related_name definido en RutaParada
+        rutas = Ruta.objects.prefetch_related('rutas_paradas__parada').all()
         serializer = RutaSerializer(rutas, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -29,7 +30,8 @@ class RutaListAPIView(APIView):
 class RutaDetailAPIView(APIView):
     def get(self, request, id):
         try:
-            ruta = Ruta.objects.prefetch_related('rutaparada_set__parada').get(id=id)
+            # Usamos nuevamente 'rutas_paradas__parada' para prefetch
+            ruta = Ruta.objects.prefetch_related('rutas_paradas__parada').get(id=id)
         except Ruta.DoesNotExist:
             return Response({'detail': 'Ruta no encontrada'}, status=status.HTTP_404_NOT_FOUND)
 
@@ -41,11 +43,13 @@ class ParadaListAPIView(APIView):
     def get(self, request):
         ruta_id = request.query_params.get('ruta_id')
         if ruta_id:
+            # Filtramos por la relación inversa del modelo intermedio; se utiliza el nombre predeterminado 'rutaparada' en el filtro
             paradas = Parada.objects.filter(rutaparada__ruta__id=ruta_id).distinct()
         else:
             paradas = Parada.objects.all()
 
-        paradas = paradas.prefetch_related('rutaparada_set__ruta')
+        # Usamos 'paradas_rutas__ruta' como related_name definido en RutaParada para la relación inversa en Parada
+        paradas = paradas.prefetch_related('paradas_rutas__ruta')
         serializer = ParadaSerializer(paradas, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -53,7 +57,8 @@ class ParadaListAPIView(APIView):
 class ParadaDetailAPIView(APIView):
     def get(self, request, id):
         try:
-            parada = Parada.objects.prefetch_related('rutaparada_set__ruta').get(id=id)
+            # Prefetch usando el related_name 'paradas_rutas'
+            parada = Parada.objects.prefetch_related('paradas_rutas__ruta').get(id=id)
         except Parada.DoesNotExist:
             return Response({'detail': 'Parada no encontrada'}, status=status.HTTP_404_NOT_FOUND)
 
@@ -65,16 +70,13 @@ class RutaParadaListAPIView(APIView):
     def get(self, request):
         ruta_id = request.query_params.get('ruta_id')
         parada_id = request.query_params.get('parada_id')
+        filters = {}
+        if ruta_id:
+            filters['ruta__id'] = ruta_id
+        if parada_id:
+            filters['parada__id'] = parada_id
 
-        if ruta_id and parada_id:
-            ruta_paradas = RutaParada.objects.filter(ruta__id=ruta_id, parada__id=parada_id)
-        elif ruta_id:
-            ruta_paradas = RutaParada.objects.filter(ruta__id=ruta_id)
-        elif parada_id:
-            ruta_paradas = RutaParada.objects.filter(parada__id=parada_id)
-        else:
-            ruta_paradas = RutaParada.objects.all()
-
+        ruta_paradas = RutaParada.objects.filter(**filters)
         serializer = RutaParadaSerializer(ruta_paradas, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
