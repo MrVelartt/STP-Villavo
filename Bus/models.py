@@ -4,7 +4,7 @@ import csv
 import io
 import re
 import requests
-
+from django.core.exceptions import ValidationError
 
 class AppInfo(models.Model):
     icono_app = models.ImageField(upload_to='iconos/', null=True, blank=True, verbose_name="Ícono de la App")
@@ -32,6 +32,20 @@ class CaracteristicaApp(models.Model):
         verbose_name_plural = "Características de la App"
 
 
+class Parada(models.Model):
+    nombre = models.CharField(max_length=255, verbose_name="Nombre de la Parada")
+    coordenada = models.CharField(max_length=255, verbose_name="Coordenada (lat, lon)")
+    orden = models.IntegerField(verbose_name="Orden de la Parada")
+    icono = models.ImageField(upload_to='paradas/', null=True, blank=True, verbose_name="Ícono de la Parada")
+
+    def __str__(self):
+        return self.nombre
+
+    class Meta:
+        verbose_name = "Parada"
+        verbose_name_plural = "Paradas"
+
+
 class Ruta(models.Model):
     name_route = models.CharField(max_length=255, verbose_name="Nombre de la Ruta", default="Ruta Desconocida")
     short_name = models.CharField(max_length=255, verbose_name="Abreviatura Ruta", null=True)
@@ -47,6 +61,9 @@ class Ruta(models.Model):
     barrios = models.JSONField(null=True, blank=True, default=dict, verbose_name="Lista de Barrios")
     coordenadas = models.JSONField(null=True, blank=True, default=list, verbose_name="Coordenadas (JSON generado)")
     archivo_csv = models.FileField(upload_to='csvs/', null=True, blank=True, verbose_name="Archivo CSV de Coordenadas")
+    
+    # Relación Many-to-Many con Parada, usando el modelo intermedio RutaParada
+    paradas = models.ManyToManyField(Parada, through='RutaParada', related_name="rutas", verbose_name="Paradas de la Ruta", blank=True)
 
     def __str__(self):
         return self.name_route
@@ -66,13 +83,11 @@ class Ruta(models.Model):
         try:
             contenido = ""
 
-            # Intentamos leer como archivo local
             try:
                 self.archivo_csv.open('r')
                 contenido = self.archivo_csv.read().decode('utf-8')
                 self.archivo_csv.close()
-            except Exception as e:
-                # En caso de usar almacenamiento externo (S3, etc.)
+            except Exception:
                 if hasattr(self.archivo_csv, 'url'):
                     response = requests.get(self.archivo_csv.url)
                     if response.status_code == 200:
@@ -98,3 +113,32 @@ class Ruta(models.Model):
         except Exception as e:
             print(f"Error procesando CSV: {e}")
             return []
+
+
+class RutaParada(models.Model):
+    ruta = models.ForeignKey("Ruta", on_delete=models.CASCADE, related_name="rutas_paradas")
+    parada = models.ForeignKey("Parada", on_delete=models.CASCADE, related_name="paradas_rutas")
+    orden_parada = models.IntegerField(verbose_name="Orden de la Parada")
+
+    class Meta:
+        # Asegura que una misma parada no se repita en la misma ruta
+        unique_together = ('ruta', 'parada')
+        # Ordena por orden_parada al consultar
+        ordering = ['orden_parada']
+        verbose_name = "Ruta - Parada"
+        verbose_name_plural = "Rutas - Paradas"
+
+    def __str__(self):
+        return f"{self.ruta.name_route} - {self.parada.nombre} (Orden: {self.orden_parada})"
+
+    def clean(self):
+        # Validación para evitar que se repita el mismo orden_parada en una misma ruta
+        if self.ruta_id and self.orden_parada is not None:
+            existe = RutaParada.objects.filter(
+                ruta=self.ruta,
+                orden_parada=self.orden_parada
+            ).exclude(pk=self.pk).exists()
+            if existe:
+                raise ValidationError({
+                    'orden_parada': f"Ya existe una parada con orden {self.orden_parada} en la ruta '{self.ruta.name_route}'."
+                })
